@@ -1,3 +1,9 @@
+# 1-es próbafeladat
+A megoldás itt: [dgw-1.md](./dgw-1.md)
+
+
+# 2-es próbafeladat
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Futtatás
