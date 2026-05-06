@@ -22,6 +22,20 @@ query Points($first: Int!, $sessionId: ID!, $sortBy: PickupPointSortInput, $loca
             }
             distance(location: $location)
             icon
+            openingHours {
+              day
+              start {
+                hour
+                minute
+              }
+              end {
+                hour
+                minute
+              }
+            }
+            name
+            phone
+            type
           }
         }
       }
@@ -39,17 +53,17 @@ export async function getPickupPoints(lat: number, lng: number, sessionId: strin
     query: GET_PICKUP_POINTS,
     variables: {
       "sessionId": sessionId,
-      "first": 5,
+      "first": 50,
       "sortBy": {
         "location": {
-          "latitude": 47.239635,
-          "longitude": 18.29724
+          "latitude": lat,
+          "longitude": lng
         },
         "field": "DISTANCE"
       },
       "location": {
-        "latitude": 47.239635,
-        "longitude": 18.29724
+        "latitude": lat,
+        "longitude": lng
       }
     }
   });
