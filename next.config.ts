@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       new URL("https://api.beta.deliverygateway.io/**"),
     ],
   },
+  devIndicators: false,
 };
 
 export default nextConfig;
