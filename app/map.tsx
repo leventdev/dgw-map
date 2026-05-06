@@ -3,15 +3,24 @@
 import { useEffect, useRef, useState } from "react"
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css"
+import dynamic from "next/dynamic";
 
+const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+
+const SearchBox = dynamic(
+    () => import("@mapbox/search-js-react").then((mod) => mod.SearchBox),
+    { ssr: false }
+);
 
 export default function Map() {
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const moveDebounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [center, setCenter] = useState<{ lng: number; lat: number }>({ lng: 18.296212, lat: 47.240285 });
+    const mapRef = useRef<mapboxgl.Map | null>(null);
+    const [mapSearchInput, setSearchInput] = useState("");
 
     useEffect(() => {
-        mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+        mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
         if (mapContainerRef.current) {
             const map = new mapboxgl.Map({
@@ -22,6 +31,8 @@ export default function Map() {
                 maxZoom: 18,
                 minZoom: 10,
             });
+
+            mapRef.current = map;
 
             const onMoveEnd = () => {
                 if (moveDebounceRef.current) {
@@ -50,7 +61,16 @@ export default function Map() {
     }, []);
     return (
         <div className="relative w-screen h-screen">
-            <div ref={mapContainerRef} className="h-screen w-screen">
+            <div ref={mapContainerRef} className="h-screen w-screen p-4">
+                <SearchBox accessToken={MAPBOX_ACCESS_TOKEN}
+                    map={mapRef.current ?? undefined}
+                    mapboxgl={mapboxgl}
+                    value={mapSearchInput}
+                    onChange={(value) => {
+                        setSearchInput(value);
+                    }}
+                    marker
+                />
             </div>
         </div>
     )
