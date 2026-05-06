@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css"
 import dynamic from "next/dynamic";
+import { getPickupPoints } from "./query";
+import { toast } from "sonner";
 
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
@@ -18,6 +20,30 @@ export default function Map() {
     const [center, setCenter] = useState<{ lng: number; lat: number }>({ lng: 18.296212, lat: 47.240285 });
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const [mapSearchInput, setSearchInput] = useState("");
+
+    useEffect(() => {
+        if (center.lng && center.lat) {
+            const pickupPointsPromise = new Promise((resolve, reject) => {
+                getPickupPoints(center.lat, center.lng, "e8c87b49-2afe-4baa-b0a6-74fd07badba0")
+                    .then((points) => {
+                        console.log("Fetched pickup points:", points);
+                        resolve(true);
+                    }
+                    )
+                    .catch((error) => {
+                        console.error("Error fetching pickup points:", error);
+                        reject({message: error.message || "Unknown error"});
+                    });
+            });
+
+            toast.promise(pickupPointsPromise, {
+                loading: "Csomagpontok keresése...",
+                success: "Csomagpontok sikeresen betöltve!",
+                error: ({message}: {message: string}) => `Hiba a csomagpontok betöltésekor: ${message}`,
+            });
+
+        }
+    }, [center]);
 
     useEffect(() => {
         mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
