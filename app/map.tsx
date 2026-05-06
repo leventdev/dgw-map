@@ -1,0 +1,57 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react"
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css"
+
+
+export default function Map() {
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const moveDebounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [center, setCenter] = useState<{ lng: number; lat: number }>({ lng: 18.296212, lat: 47.240285 });
+
+    useEffect(() => {
+        mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+
+        if (mapContainerRef.current) {
+            const map = new mapboxgl.Map({
+                container: mapContainerRef.current,
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [18.296212, 47.240285],
+                zoom: 15,
+                maxZoom: 18,
+                minZoom: 10,
+            });
+
+            const onMoveEnd = () => {
+                if (moveDebounceRef.current) {
+                    clearTimeout(moveDebounceRef.current);
+                }
+
+                moveDebounceRef.current = setTimeout(() => {
+                    const center = map.getCenter();
+
+                    setCenter((prevCenter) => {
+                        if (Math.abs(prevCenter.lng - center.lng) > 0.001 || Math.abs(prevCenter.lat - center.lat) > 0.001) {
+                            return center;
+                        }
+                        return prevCenter;
+                    });
+                }, 1250);
+            };
+
+            map.on("moveend", onMoveEnd);
+
+            //Unmount cleanup
+            return () => {
+                map.remove();
+            }
+        }
+    }, []);
+    return (
+        <div className="relative w-screen h-screen">
+            <div ref={mapContainerRef} className="h-screen w-screen">
+            </div>
+        </div>
+    )
+}
